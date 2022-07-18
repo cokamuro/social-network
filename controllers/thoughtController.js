@@ -9,6 +9,15 @@ module.exports = {
             res.status(500).json(err);
         }
     },
+    async createThought({ body }, res) {
+        try {
+            const thought = await Thought.create(body);
+            const user = User.findOneAndUpdate({ username: body.username }, { $addToSet: { thoughts: thought._id } }, { new: true })
+            !user ? res.status(404).json({ message: `User ${body.username} not found` }) : res.json(thought);
+        } catch (err) {
+            res.status(500).json(err);
+        }
+    },
     async getOneThought({ params }, res) {
         try {
             const thought = await Thought.findOne({ _id: params.thoughtId });
@@ -17,11 +26,40 @@ module.exports = {
             res.status(500).json(err);
         }
     },
-    async createThought({ body }, res) {
+    async updateThought({ params, body }, res) {
         try {
-            const thought = await Thought.create(body);
-            const user = User.findOneAndUpdate({ username: body.username }, { $addToSet: { thoughts: thought._id } }, { new: true })
-            !user ? res.status(404).json({ message: `User ${body.username} not found` }) : res.json(thought);
+            await Thought.updateOne({ _id: params.thoughtId }, body, { new: true, runValidators: true });
+            const thought = await Thought.findOne({ _id: params.thoughtId });
+            !thought ? res.status(404).json({ message: `Thought with id ${params.thoughtId} not found` }) : res.json(thought);
+        } catch (err) {
+            res.status(500).json(err);
+        }
+    },
+    async deleteThought({ params }, res) {
+        try {
+            const thought = await Thought.findOneAndDelete({ _id: params.thoughtId });
+            if (!thought) res.status(404).json({ message: `Thought with id ${params.thoughtId} not found` });
+            else {
+                await User.updateOne({ thoughts: params.thoughtId }, { $pull: { thoughts: params.thoughtId } }, { new: true });
+                res.json({ message: `Thought ${params.thoughtId} deleted` });
+            }
+        } catch (err) {
+            res.status(500).json(err);
+        }
+    },
+    async addReaction({ params, body }, res) {
+        try {
+            await Thought.updateOne({ _id: params.thoughtId }, { $push: { reactions: body }, new: true, runValidators: true });
+            const thought = await Thought.findOne({ _id: params.thoughtId });
+            !thought ? res.status(404).json({ message: `Thought with id ${params.thoughtId} not found` }) : res.json(thought);
+        } catch (err) {
+            res.status(500).json(err);
+        }
+    },
+    async removeReaction({ params }, res) {
+        try {
+            await Thought.updateOne({ _id: params.thoughtId }, { $pull: { reactions: { _id: params.reactionId } }, new: true });
+            res.json({ message: `Reaction ${params.reactionId} deleted` });
         } catch (err) {
             res.status(500).json(err);
         }
