@@ -47,4 +47,22 @@ module.exports = {
             res.status(500).json(err);
         }
     },
+    async addToFriends({ params }, res) {
+        try {
+            await User.updateOne({ _id: params.userId }, { $push: { friends: params.friendId } }, { new: true });
+            const user = await User.findOne({ _id: params.userId });
+            !user ? res.status(404).json({ message: `No user with id ${params.userId}` }) : res.json(user);
+        } catch (err) {
+            res.status(500).json(err);
+        }
+    },
+    async removeFromFriends({ params }, res) {
+        try {
+            await User.updateOne({ _id: params.userId }, { $pull: { friends: params.friendId } }, { new: true });
+            const user = await User.findOne({ _id: params.userId });
+            !user ? res.status(404).json({ message: `No user with id ${params.userId}` }) : res.json(user);
+        } catch (err) {
+            res.status(500).json(err);
+        }
+    }
 }

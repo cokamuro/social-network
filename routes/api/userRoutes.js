@@ -19,8 +19,10 @@ router.route('/:userId')
     // bonus: remove a user's associated thoughts when deleted
 
 // api/users/:userId/friends/:friendId
-
-// post to add a new friend to a user's friend list
-// delete to remove a friend from a user's friend list
+router.route('/:userId/friends/:friendId')
+    // post to add a new friend to a user's friend list
+    .post(addToFriends)
+    // delete to remove a friend from a user's friend list
+    .delete(removeFromFriends);
 
 module.exports = router;
