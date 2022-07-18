@@ -26,3 +26,5 @@ router.route('/:thoughtId/reactions/:reactionId')
     .post(addReaction)
     // delete to pull and remove a reaction by the reactionId value
     .delete(removeReaction);
+
+module.exports = router;
