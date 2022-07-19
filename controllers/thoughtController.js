@@ -4,7 +4,11 @@ module.exports = {
     async getAllThoughts(req, res) {
         try {
             const thoughts = await Thought.find();
-            !thoughts.length ? res.status(404).json({ message: 'No thoughts found' }) : res.json(thoughts);
+            if (thoughts) {
+                res.json(thoughts);
+            } else {
+                res.status(404).json({ message: 'No thoughts found' })
+            }
         } catch (err) {
             res.status(500).json(err);
         }
@@ -12,8 +16,12 @@ module.exports = {
     async createThought({ body }, res) {
         try {
             const thought = await Thought.create(body);
-            const user = User.findOneAndUpdate({ username: body.username }, { $addToSet: { thoughts: thought._id } }, { new: true })
-            !user ? res.status(404).json({ message: `User ${body.username} not found` }) : res.json(thought);
+            const user = await User.findOneAndUpdate({ _id: body.userId }, { $addToSet: { thoughts: thought._id } }, { new: true })
+            if (user) {
+                res.json(thought);
+            } else {
+                res.status(404).json({ message: `User ${body.username} not found` });
+            }
         } catch (err) {
             res.status(500).json(err);
         }
@@ -21,7 +29,11 @@ module.exports = {
     async getOneThought({ params }, res) {
         try {
             const thought = await Thought.findOne({ _id: params.thoughtId });
-            !thought ? res.status(404).json({ message: `Thought with id ${params.thoughtId} not found` }) : res.json(thought);
+            if(thought){
+                res.json(thought);
+            } else {
+                res.status(404).json({ message: `Thought with id ${params.thoughtId} not found` });
+            }           
         } catch (err) {
             res.status(500).json(err);
         }
@@ -30,7 +42,11 @@ module.exports = {
         try {
             await Thought.updateOne({ _id: params.thoughtId }, body, { new: true, runValidators: true });
             const thought = await Thought.findOne({ _id: params.thoughtId });
-            !thought ? res.status(404).json({ message: `Thought with id ${params.thoughtId} not found` }) : res.json(thought);
+            if (thought) {
+                res.json(thought);
+            } else {
+                res.status(404).json({ message: `Thought with id ${params.thoughtId} not found` })
+            }
         } catch (err) {
             res.status(500).json(err);
         }
@@ -38,10 +54,11 @@ module.exports = {
     async deleteThought({ params }, res) {
         try {
             const thought = await Thought.findOneAndDelete({ _id: params.thoughtId });
-            if (!thought) res.status(404).json({ message: `Thought with id ${params.thoughtId} not found` });
-            else {
+            if (thought) {
                 await User.updateOne({ thoughts: params.thoughtId }, { $pull: { thoughts: params.thoughtId } }, { new: true });
                 res.json({ message: `Thought ${params.thoughtId} deleted` });
+            } else {
+                res.status(404).json({ message: `Thought with id ${params.thoughtId} not found` });
             }
         } catch (err) {
             res.status(500).json(err);
@@ -51,7 +68,11 @@ module.exports = {
         try {
             await Thought.updateOne({ _id: params.thoughtId }, { $push: { reactions: body }, new: true, runValidators: true });
             const thought = await Thought.findOne({ _id: params.thoughtId });
-            !thought ? res.status(404).json({ message: `Thought with id ${params.thoughtId} not found` }) : res.json(thought);
+            if (thought) {
+                res.json(thought);
+            } else {
+                res.status(404).json({ message: `Thought with id ${params.thoughtId} not found` })
+            }
         } catch (err) {
             res.status(500).json(err);
         }
