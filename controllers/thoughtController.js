@@ -16,7 +16,7 @@ module.exports = {
     async createThought({ body }, res) {
         try {
             const thought = await Thought.create(body);
-            const user = await User.findOneAndUpdate({ _id: body.userId }, { $addToSet: { thoughts: thought._id } }, { new: true })
+            const user = await User.findOneAndUpdate({ username: body.username }, { $addToSet: { thoughts: thought._id } }, { new: true })
             if (user) {
                 res.json(thought);
             } else {

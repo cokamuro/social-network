@@ -21,9 +21,12 @@ router.route('/:thoughtId')
     .delete(deleteThought);
 
 // api/thoughts/:thoughtId/reactions
-router.route('/:thoughtId/reactions/:reactionId')
+router.route('/:thoughtId/reactions')
     // post to create a reaction stored in a single thought's reactions array
     .post(addReaction)
+
+// api/thoughts/:thoughtId/reactions
+router.route('/:thoughtId/reactions/:reactionId')
     // delete to pull and remove a reaction by the reactionId value
     .delete(removeReaction);
 
